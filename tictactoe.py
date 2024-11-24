@@ -14,8 +14,8 @@ def initial_state():
     """
     Returns starting state of the board.
     """
-    return [[EMPTY, EMPTY, EMPTY],
-            [EMPTY, EMPTY, EMPTY],
+    return [[O, X, O],
+            [EMPTY, X, EMPTY],
             [EMPTY, EMPTY, EMPTY]]
 
 
@@ -33,7 +33,6 @@ def player(board):
             if board[i][j] == O:
                 cant_O = cant_O + 1
     return X if cant_X == cant_O else O
-
 def actions(board):
     """
     Returns set of all possible actions (i, j) available on the board.
@@ -103,51 +102,67 @@ def utility(board):
     
     
 def minimax(board):
-    """
-    Returns the optimal action for the current player on the board.
-    """
-    if terminal(board):
-        return None 
     
     jugador = player(board)
-    acciones = actions(board)
-    utilidad_X_base = -100
-    utilidad_O_base = 100
-    mejorMovimiento = None
+    frontier = [] #inicializo un frontier, quiero agregar acá el camino que hace el algoritmo para luego obtener utilidad
+    bestAction = "no devuelve nada minimax"
+    if jugador == X :
+        utilidadInicial = -100
+    else:
+        utilidadInicial = +100
+        
+        for accion in actions(board):
+            newBoard = result(board,accion)
+            if terminal(newBoard): #hay ganador o empate, me quedo con el de mas valor
+                utilidadAccion = utility(newBoard)
+            
+            else: #si no, necesito ir a buscar el valor esperado del nodo
+                for accionNew in actions(newBoard):
+                    utilidadAccion = blablabla #guardo valor esperado del nodo
+                
+            if utilidadAccion > utilidadInicial: #Si la utilidad de este juego es la mejor, la guardo.
+                utilidadInicial = utilidadAccion
+                bestAction = accion
     
-    if jugador == X:
-        for accion in acciones:
-            boardAccionado = result(board,accion)
-            if terminal(boardAccionado):
-                utilidadAccionado = utility(boardAccionado)
-                if utilidadAccionado > utilidad_X_base:
-                    utilidad_X_base = utilidadAccionado
-                    mejorMovimiento = accion
-            else:
-                reaccionOtroPlayer = minimax(boardAccionado)
-                boardReaccionado = result(boardAccionado,reaccionOtroPlayer)
-                utilidadReaccionado = utility(boardReaccionado)
-                if utilidadReaccionado > utilidad_X_base:
-                    utilidad_X_base = utilidadReaccionado
-                    mejorMovimiento = accion
-                    
-    if jugador == O:
-        for accion in acciones:
-            boardAccionado = result(board,accion)
-            if terminal(boardAccionado):
-                utilidadAccionado = utility(boardAccionado)
-                if utilidadAccionado < utilidad_O_base:
-                    utilidad_O_base = utilidadAccionado
-                    mejorMovimiento = accion
-                    
-            else:
-                reaccionOtroPlayer = minimax(boardAccionado)
-                boardReaccionado = result(boardAccionado,reaccionOtroPlayer)
-                utilidadReaccionado = utility(boardReaccionado)
-                if utilidadReaccionado < utilidad_O_base:
-                    utilidad_O_base = utilidadReaccionado
-                    mejorMovimiento = accion
-                    
-    return mejorMovimiento
+    return bestAction #devuelvo al mejor opcion
+             
 
 
+def utilidadFrontier(boardIncial):
+    accionBest = "no hay mejor accion"
+    jugador = player(boardIncial)
+    
+    if jugador == X :
+        bestUtilidad = -100
+    else:
+        bestUtilidad = +100
+    
+    if terminal(boardIncial):
+        return(utility(boardIncial))
+    
+    for action in boardIncial:
+        newBoard = result(boardIncial,action)
+        if terminal(newBoard):
+            utilidadNewBoard = utility(newBoard)
+            if jugador == X:
+                if bestUtilidad < utilidadNewBoard:
+                    accionBest = action
+                    bestUtilidad = utilidadNewBoard
+            if jugador == O:
+                if bestUtilidad > utilidadNewBoard:
+                    accionBest = action
+                    bestUtilidad = utilidadNewBoard
+        else: 
+            boardIncial = newBoard
+            utilidadNewBoard = utilidadFrontier(newBoard)
+            if jugador == X:
+                if bestUtilidad < utilidadNewBoard:
+                    bestUtilidad = utilidadNewBoard
+            if jugador == O:
+                if bestUtilidad > utilidadNewBoard:
+                    bestUtilidad = utilidadNewBoard
+    print(accionBest)
+    return utilidadNewBoard
+
+ver = utilidadFrontier(initial_state())
+print(ver)
